@@ -1,0 +1,46 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'fip-version-project-action'
+version = '0.1.0'
+description = 'FIP Wizard Project Action to check and suggest FIP version'
+readme = 'README.md'
+keywords = ['wizard', 'fip', 'action', 'version', 'semver']
+license = { text = 'Apache-2.0' }
+authors = [
+    { name = 'Marek Suchánek', email = 'marek.suchanek@fair-wizard.com' }
+]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.13',
+]
+requires-python = '>=3.13, <4'
+dependencies = [
+    'fastapi >=0.120, <1.0',
+    'httpx >=0.28, <1.0',
+    'Jinja2 >=3.1, <4.0',
+    'pydantic >=2.12, <3.0',
+    'rdflib >=7.4, <8.0',
+    'websocket-client >=1.9, <2.0',
+]
+
+[project.urls]
+Homepage = 'https://fip.fair-wizard.org'
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ['src']
+
+[tool.setuptools.package-data]
+'*' = ['*.css', '*.js', '*.j2', '*.png', '*.html']
+
+[tool.distutils.bdist_wheel]
+universal = true
