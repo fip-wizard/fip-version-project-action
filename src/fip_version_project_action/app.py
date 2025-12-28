@@ -41,8 +41,12 @@ def create_app(api_url: str | None = None, root_path: str | None = None) -> fast
     async def prepare_action(req: schemas.PrepareRequest) -> schemas.PrepareResponse:
         return await logic.prepare_action(api_url, req)
 
-    @app.post('/api/submit-version', response_model=schemas.VersionResponse)
-    async def submit_version(req: schemas.VersionRequest) -> schemas.VersionResponse:
+    @app.post('/api/save-version', response_model=schemas.VersionSaveResponse)
+    async def save_version(req: schemas.VersionRequest) -> schemas.VersionSaveResponse:
+        return await logic.save_version(api_url, req)
+
+    @app.post('/api/submit-version', response_model=schemas.VersionSubmitResponse)
+    async def submit_version(req: schemas.VersionRequest) -> schemas.VersionSubmitResponse:
         return await logic.submit_version(api_url, req)
 
     return app

@@ -21,8 +21,40 @@ jQuery(document).ready(function() {
                 action.sendResult(false, 'FIP version action has been closed by the user.')
             })
             jQuery('#btn-confirm').on('click', function() {
-                jQuery(this).prop('disabled', true)
-                jQuery('#btn-cancel').prop('disabled', true)
+                setProcessing("Saving version, please wait...")
+                // extract version
+                const versionMajor = jQuery('#version-major').val()
+                const versionMinor = jQuery('#version-minor').val()
+                const versionPatch = jQuery('#version-patch').val()
+                const version = `${versionMajor}.${versionMinor}.${versionPatch}`
+                const description = jQuery('#version-description').val()
+
+                console.log('User confirmed with version:', version)
+                // send ajax
+                jQuery.ajax({
+                    url: `${ROOT_PATH}/api/save-version`,
+                    method: 'POST',
+                    data: JSON.stringify({
+                        projectUuid: data.projectUuid,
+                        userToken: data.userToken,
+                        version: version,
+                        description: description,
+                    }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        console.log('Action executed successfully:', response)
+                        action.sendResult(true, `FIP version action completed successfully and updated version to **${version}**.`)
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error executing action:', error)
+                        jQuery('#error-message').text('Failed to execute action. Please try again later.')
+                        unsetProcessing()
+                        $error.show()
+                    }
+                })
+            })
+            jQuery('#btn-submit').on('click', function() {
+                setProcessing("Saving version, generating RDF document and submitting it, please wait...")
                 // extract version
                 const versionMajor = jQuery('#version-major').val()
                 const versionMinor = jQuery('#version-minor').val()
@@ -44,12 +76,26 @@ jQuery(document).ready(function() {
                     contentType: 'application/json',
                     success: function(response) {
                         console.log('Action executed successfully:', response)
-                        action.sendResult(true, `FIP version action completed successfully and updated version to **${version}**.`)
+                        if (response.ok) {
+                            if (response.submissionDone) {
+                                let message = `FIP version action completed successfully and submitted version **${version}** for review. The review process has been started.`
+                                if (response.submissionLocation) {
+                                    message += `\n\nSubmitted nanopublication is available via [${response.submissionLocation}](${response.submissionLocation}).`
+                                }
+                                action.sendResult(true, message)
+                            } else if (response.documentDone) {
+                                action.sendResult(false, `The RDF document has been successfully generated for version **${version}**. However, the submission could not be completed at this time. Please check the issues on the Documents tab.`)
+                            } else {
+                                action.sendResult(false, `The version **${version}** has been saved, but the submission could not be completed at this time. Please check the issues on the Documents tab.`)
+                            }
+                        } else {
+                            action.sendResult(false, `FIP version action failed to submit version:\n\n${response.message}`)
+                        }
                     },
                     error: function(xhr, status, error) {
                         console.error('Error executing action:', error)
                         jQuery('#error-message').text('Failed to execute action. Please try again later.')
-                        $(this).prop('disabled', false)
+                        unsetProcessing()
                         $error.show()
                     }
                 })
@@ -66,9 +112,11 @@ jQuery(document).ready(function() {
                 if (parsedLast) {
                     if (compareSemver(parsedNext, parsedLast) <= 0) {
                         jQuery('#warning').show()
+                        jQuery('#btn-submit').prop('disabled', true)
                         jQuery('#btn-confirm').prop('disabled', true)
                     } else {
                         jQuery('#warning').hide()
+                        jQuery('#btn-submit').prop('disabled', false)
                         jQuery('#btn-confirm').prop('disabled', false)
                     }
                 }
@@ -144,6 +192,27 @@ jQuery(document).ready(function() {
             console.error(error)
         })
 })
+
+function setProcessing(message) {
+    jQuery('#btn-confirm').prop('disabled', true)
+    jQuery('#btn-submit').prop('disabled', true)
+    jQuery('#btn-cancel').prop('disabled', true)
+    jQuery('#version-major').prop('disabled', true)
+    jQuery('#version-minor').prop('disabled', true)
+    jQuery('#version-patch').prop('disabled', true)
+    jQuery('#processing-message').text(message)
+    jQuery('#processing').show()
+}
+
+function unsetProcessing() {
+    jQuery('#btn-confirm').prop('disabled', false)
+    jQuery('#btn-submit').prop('disabled', false)
+    jQuery('#btn-cancel').prop('disabled', false)
+    jQuery('#version-major').prop('disabled', false)
+    jQuery('#version-minor').prop('disabled', false)
+    jQuery('#version-patch').prop('disabled', false)
+    jQuery('#processing').hide()
+}
 
 function parseSemver(v) {
     const match = v.match(/^(\d+)\.(\d+)\.(\d+)$/);
