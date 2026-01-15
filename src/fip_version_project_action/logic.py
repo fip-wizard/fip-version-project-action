@@ -192,14 +192,14 @@ class APIClient:
 
     async def fetch_questionnaire(self, project_uuid: str) -> dict:
         response = await self.client.get(
-            url=f'/questionnaires/{project_uuid}/questionnaire',
+            url=f'/projects/{project_uuid}/questionnaire',
         )
         response.raise_for_status()
         return response.json()
 
     async def fetch_documents(self, project_uuid: str) -> dict:
         response = await self.client.get(
-            url=f'/questionnaires/{project_uuid}/documents',
+            url=f'/projects/{project_uuid}/documents',
         )
         response.raise_for_status()
         return response.json()
@@ -217,7 +217,7 @@ class APIClient:
     async def create_project_version(self, project_uuid: str, event_uuid: str,
                                      version: str, description: str) -> dict:
         response = await self.client.post(
-            url=f'/questionnaires/{project_uuid}/versions',
+            url=f'/projects/{project_uuid}/versions',
             json={
                 'eventUuid': event_uuid,
                 'name': version,
@@ -261,20 +261,12 @@ class APIClient:
             url='/documents',
             json={
                 'name': document_name,
-                'questionnaireUuid': project_uuid,
+                'projectUuid': project_uuid,
                 'documentTemplateId': document_template_id,
                 'formatUuid': format_uuid,
-                'questionnaireEventUuid': event_uuid,
+                'projectEventUuid': event_uuid,
             },
         )
-        print(json.dumps({
-            'name': document_name,
-            'questionnaireUuid': project_uuid,
-            'documentTemplateId': document_template_id,
-            'formatUuid': format_uuid,
-            'questionnaireEventUuid': event_uuid,
-        }, indent=2))
-        print(response.text)
         response.raise_for_status()
         return response.json()
 
@@ -291,11 +283,11 @@ class APIClient:
         return response.json()
 
     async def wait_for_document(self, document: dict) -> dict:
-        project_uuid = document.get('questionnaire', {}).get('uuid', '')
+        project_uuid = document.get('project', {}).get('uuid', '')
         document_uuid = document.get('uuid', '')
         while True:
             response = await self.client.get(
-                url=f'/questionnaires/{project_uuid}/documents',
+                url=f'/projects/{project_uuid}/documents',
                 params={
                     'page': 0,
                     'size': 20,
@@ -319,7 +311,7 @@ class APIClient:
         ws_url = await self.get_websocket_url()
         ws_params = {
             'Authorization': f'Bearer {self.user_token}',
-            'subscription': 'Questionnaire',
+            'subscription': 'Project',
             'identifier': project_uuid,
         }
         if not ws_url:
@@ -336,7 +328,7 @@ class APIClient:
         event_uuid = str(uuid.uuid4())
         events = [
             {
-                'type': 'SetContent_ClientQuestionnaireAction',
+                'type': 'SetContent_ClientProjectMessage',
                 'data': {
                     'type': 'SetReplyEvent',
                     'uuid': event_uuid,

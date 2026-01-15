@@ -49,6 +49,7 @@ jQuery(document).ready(function() {
                         console.error('Error executing action:', error)
                         jQuery('#error-message').text('Failed to execute action. Please try again later.')
                         unsetProcessing()
+                        $content.hide()
                         $error.show()
                     }
                 })
@@ -96,6 +97,7 @@ jQuery(document).ready(function() {
                         console.error('Error executing action:', error)
                         jQuery('#error-message').text('Failed to execute action. Please try again later.')
                         unsetProcessing()
+                        $content.hide()
                         $error.show()
                     }
                 })
@@ -177,6 +179,7 @@ jQuery(document).ready(function() {
                     } else {
                         jQuery('#error-message').text('Failed to load versions: ' + response.message)
                         $loader.hide()
+                        $content.hide()
                         $error.show()
                     }
                 },
@@ -184,6 +187,7 @@ jQuery(document).ready(function() {
                     console.error('Error fetching versions:', error)
                     jQuery('#error-message').text('Failed to load versions. Please try again later.')
                     $loader.hide()
+                    $content.hide()
                     $error.show()
                 }
             })
