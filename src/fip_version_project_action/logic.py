@@ -192,14 +192,14 @@ class APIClient:
 
     async def fetch_questionnaire(self, project_uuid: str) -> dict:
         response = await self.client.get(
-            url=f'/projects/{project_uuid}/questionnaire',
+            url=f'/questionnaires/{project_uuid}/questionnaire',
         )
         response.raise_for_status()
         return response.json()
 
     async def fetch_documents(self, project_uuid: str) -> dict:
         response = await self.client.get(
-            url=f'/projects/{project_uuid}/documents',
+            url=f'/questionnaires/{project_uuid}/documents',
         )
         response.raise_for_status()
         return response.json()
@@ -217,7 +217,7 @@ class APIClient:
     async def create_project_version(self, project_uuid: str, event_uuid: str,
                                      version: str, description: str) -> dict:
         response = await self.client.post(
-            url=f'/projects/{project_uuid}/versions',
+            url=f'/questionnaires/{project_uuid}/versions',
             json={
                 'eventUuid': event_uuid,
                 'name': version,
@@ -261,10 +261,10 @@ class APIClient:
             url='/documents',
             json={
                 'name': document_name,
-                'projectUuid': project_uuid,
+                'questionnaireUuid': project_uuid,
                 'documentTemplateId': document_template_id,
                 'formatUuid': format_uuid,
-                'projectEventUuid': event_uuid,
+                'questionnaireEventUuid': event_uuid,
             },
         )
         response.raise_for_status()
@@ -272,7 +272,7 @@ class APIClient:
 
     async def submit_document(self, document: dict) -> dict:
         document_uuid = document.get('uuid', '')
-        service_id = 'nanopub-test'
+        service_id = 'nanopub-real'
         response = await self.client.post(
             url=f'/documents/{document_uuid}/submissions',
             json={
@@ -287,7 +287,7 @@ class APIClient:
         document_uuid = document.get('uuid', '')
         while True:
             response = await self.client.get(
-                url=f'/projects/{project_uuid}/documents',
+                url=f'/questionnaires/{project_uuid}/documents',
                 params={
                     'page': 0,
                     'size': 20,
@@ -311,7 +311,7 @@ class APIClient:
         ws_url = await self.get_websocket_url()
         ws_params = {
             'Authorization': f'Bearer {self.user_token}',
-            'subscription': 'Project',
+            'subscription': 'Questionnaire',
             'identifier': project_uuid,
         }
         if not ws_url:
@@ -328,7 +328,7 @@ class APIClient:
         event_uuid = str(uuid.uuid4())
         events = [
             {
-                'type': 'SetContent_ClientProjectMessage',
+                'type': 'SetContent_ClientQuestionnaireAction',
                 'data': {
                     'type': 'SetReplyEvent',
                     'uuid': event_uuid,
