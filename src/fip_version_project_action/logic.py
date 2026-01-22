@@ -12,6 +12,7 @@ from . import schemas
 
 VERSION_REPLY_PATH = 'c1248b82-0538-4780-a0b4-983f632b1615.1c3b8b33-d9b6-435d-a69e-498f09a51fca'
 RDF_FIP_TYPE = rdflib.URIRef('https://w3id.org/fair/fip/terms/FAIR-Implementation-Profile')
+RDF_RFIP_TYPE = rdflib.URIRef('https://w3id.org/fair/fip/terms/Reference-FAIR-Implementation-Profile')
 RDF_VERSION = rdflib.URIRef('https://schema.org/version')
 USER_AGENT = 'fip-version-project-action/0.1.0'
 NANOPUB_TEMPLATE_PREFIX = 'dsw:nanopub-template:'
@@ -378,6 +379,9 @@ def extract_version(nanopub_rdf: str) -> str | None:
     g = rdflib.ConjunctiveGraph()
     g.parse(data=nanopub_rdf, format='trig')
     for s in g.subjects(rdflib.RDF.type, RDF_FIP_TYPE):
+        for o in g.objects(s, RDF_VERSION):
+            return str(o)
+    for s in g.subjects(rdflib.RDF.type, RDF_RFIP_TYPE):
         for o in g.objects(s, RDF_VERSION):
             return str(o)
     return None
