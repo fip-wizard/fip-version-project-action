@@ -230,6 +230,7 @@ function rectifySemver(input) {
 
 function parseSemver(v) {
     v = rectifySemver(v);
+    if (!v) return null;
     const match = v.match(/^(\d+)\.(\d+)\.(\d+)$/);
     if (!match) return null;
     return match.slice(1).map(Number);
