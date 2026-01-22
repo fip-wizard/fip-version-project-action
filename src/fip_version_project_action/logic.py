@@ -368,6 +368,7 @@ async def _fetch_fip_nanopublication(client: httpx.AsyncClient, uri: str) -> str
             'User-Agent': USER_AGENT,
         },
         timeout=10.0,
+        follow_redirects=True,
     )
     response.raise_for_status()
     return response.text
