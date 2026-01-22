@@ -218,7 +218,18 @@ function unsetProcessing() {
     jQuery('#processing').hide()
 }
 
+function rectifySemver(input) {
+  if (typeof input !== "string") return null;
+
+  const match = input.match(/v?(\d+)(?:\.(\d+))?(?:\.(\d+))?/i);
+  if (!match) return null;
+
+  const [, major, minor = "0", patch = "0"] = match;
+  return `${major}.${minor}.${patch}`;
+}
+
 function parseSemver(v) {
+    v = rectifySemver(v);
     const match = v.match(/^(\d+)\.(\d+)\.(\d+)$/);
     if (!match) return null;
     return match.slice(1).map(Number);
