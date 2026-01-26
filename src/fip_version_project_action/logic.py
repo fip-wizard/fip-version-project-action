@@ -284,7 +284,7 @@ class APIClient:
         return response.json()
 
     async def wait_for_document(self, document: dict) -> dict:
-        project_uuid = document.get('project', {}).get('uuid', '')
+        project_uuid = document.get('questionnaire', {}).get('uuid', '')
         document_uuid = document.get('uuid', '')
         while True:
             response = await self.client.get(
